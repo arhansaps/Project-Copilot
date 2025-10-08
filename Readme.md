@@ -103,5 +103,5 @@ List the primary technologies, frameworks, and tools used to build your project.
 * **Frontend:** `(Angular, Flutter)`
 * **Backend:** `(FastAPI)`
 * **Database:** `(MySQL)`
-* **Machine Learning:** `(OpenAI api keys)`
+* **Machine Learning:** `(OpenAI api key)`
 * **Deployment:** `(Docker)`
