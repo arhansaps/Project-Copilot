@@ -1,6 +1,6 @@
 # Manipal Hackathon 2025: [Project Name]
 
-> **Note:** This is a template. Please edit all sections marked with `<...>` and fill in your project's specific details before submission.
+
 
 **Team Name:** Wingardium RavaDosa
 
