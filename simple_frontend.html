@@ -20,11 +20,13 @@
         
         .sidebar {
             width: 300px;
+            height: 100vh;
             background: #2d3748;
             color: white;
             display: flex;
             flex-direction: column;
             border-right: 1px solid #4a5568;
+            overflow: hidden;
         }
         
         .sidebar-header {
@@ -34,14 +36,23 @@
         
         .sidebar-header h2 {
             font-size: 18px;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
         
-        .new-chat-btn {
-            width: 100%;
+        .chat-count {
+            font-size: 14px;
+            color: #a0aec0;
+            font-weight: normal;
+        }
+        
+        .sidebar-buttons {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .home-btn, .new-chat-btn {
+            flex: 1;
             padding: 10px;
-            background: #667eea;
-            color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -49,14 +60,69 @@
             transition: background 0.2s;
         }
         
+        .home-btn {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .home-btn:hover {
+            background: #545b62;
+        }
+        
+        .new-chat-btn {
+            background: #667eea;
+            color: white;
+        }
+        
         .new-chat-btn:hover {
             background: #5a67d8;
+        }
+        
+        .sidebar-actions {
+            margin-top: 10px;
+        }
+        
+        .clear-chats-btn {
+            width: 100%;
+            padding: 8px;
+            background: #e53e3e;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: background 0.2s;
+        }
+        
+        .clear-chats-btn:hover {
+            background: #c53030;
         }
         
         .chat-list {
             flex: 1;
             overflow-y: auto;
             padding: 10px;
+            max-height: calc(100vh - 120px);
+        }
+        
+        /* Custom scrollbar for chat list */
+        .chat-list::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .chat-list::-webkit-scrollbar-track {
+            background: #1a202c;
+            border-radius: 4px;
+        }
+        
+        .chat-list::-webkit-scrollbar-thumb {
+            background: #4a5568;
+            border-radius: 4px;
+        }
+        
+        .chat-list::-webkit-scrollbar-thumb:hover {
+            background: #718096;
         }
         
         .chat-item {
@@ -882,14 +948,15 @@
             .chat-list {
                 display: flex;
                 overflow-x: auto;
-                overflow-y: hidden;
+                overflow-y: auto;
                 padding: 10px;
+                flex-direction: column;
             }
             
             .chat-item {
-                min-width: 200px;
-                margin-right: 10px;
-                margin-bottom: 0;
+                min-width: auto;
+                margin-right: 0;
+                margin-bottom: 8px;
             }
             
             .main-content {
@@ -961,8 +1028,14 @@
     <!-- Sidebar (Hidden Initially) -->
     <div class="sidebar" id="sidebar" style="display: none;">
         <div class="sidebar-header">
-            <h2>💬 Chat History</h2>
-            <button class="new-chat-btn" onclick="createNewChat()">+ New Chat</button>
+            <h2>💬 Chat History <span class="chat-count" id="chatCount">(0)</span></h2>
+            <div class="sidebar-buttons">
+                <button class="home-btn" onclick="returnToHomePage()" title="Go Back to Home">🏠 Home</button>
+                <button class="new-chat-btn" onclick="createNewChat()">+ New Chat</button>
+            </div>
+            <div class="sidebar-actions">
+                <button class="clear-chats-btn" onclick="clearAllChats()" title="Clear All Chats">🗑️ Clear All</button>
+            </div>
         </div>
         <div class="chat-list" id="chatList">
             <!-- Chat items will be populated here -->
@@ -1549,6 +1622,12 @@
             
             console.log('Rendering chat list with', chats.length, 'chats');
             
+            // Update chat count
+            const chatCount = document.getElementById('chatCount');
+            if (chatCount) {
+                chatCount.textContent = `(${chats.length})`;
+            }
+            
             // Clear existing content
             chatList.innerHTML = '';
             
@@ -1807,7 +1886,7 @@
                 currentChatId = null;
                 scrollPositions = {};
                 localStorage.removeItem('oee_chats');
-                createNewChat();
+                returnToHomePage();
                 console.log('All chats cleared');
             }
         }
@@ -1959,13 +2038,33 @@
             resultDiv.className = `upload-result ${success ? 'success' : 'error'}`;
             
             if (success) {
-                contentDiv.innerHTML = `
-                    <h4>✅ Upload Successful!</h4>
-                    <p><strong>Table:</strong> ${data.table_name}</p>
-                    <p><strong>Rows:</strong> ${data.rows_inserted}</p>
-                    <p><strong>Columns:</strong> ${data.columns.join(', ')}</p>
-                    <p>You can now query this data using natural language!</p>
-                `;
+                if (data.duplicate_detected) {
+                    contentDiv.innerHTML = `
+                        <h4>🔄 Duplicate Data Detected!</h4>
+                        <p><strong>Existing Table:</strong> ${data.table_name}</p>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>Rows:</strong> ${data.rows_inserted} (no new data added)</p>
+                        <p><strong>Columns:</strong> ${data.columns.join(', ')}</p>
+                        <p>This data already exists in the database. No duplicate table was created.</p>
+                    `;
+                } else if (data.combined_with_existing) {
+                    contentDiv.innerHTML = `
+                        <h4>🔗 Tables Combined Successfully!</h4>
+                        <p><strong>Combined Table:</strong> ${data.table_name}</p>
+                        <p><strong>Message:</strong> ${data.message}</p>
+                        <p><strong>New Rows Added:</strong> ${data.rows_inserted}</p>
+                        <p><strong>Columns:</strong> ${data.columns.join(', ')}</p>
+                        <p>Data with the same schema was automatically combined into one table!</p>
+                    `;
+                } else {
+                    contentDiv.innerHTML = `
+                        <h4>✅ Upload Successful!</h4>
+                        <p><strong>Table:</strong> ${data.table_name}</p>
+                        <p><strong>Rows:</strong> ${data.rows_inserted}</p>
+                        <p><strong>Columns:</strong> ${data.columns.join(', ')}</p>
+                        <p>You can now query this data using natural language!</p>
+                    `;
+                }
             } else {
                 contentDiv.innerHTML = `
                     <h4>❌ Upload Failed</h4>

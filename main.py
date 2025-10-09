@@ -95,8 +95,13 @@ async def process_query(request: QueryRequest):
 
         chart_spec = None
         chart_image = None
-        if result["results"]:
-            logger.info(f"Generating chart for query: {request.query}")
+        
+        # Only generate charts when explicitly requested
+        query_lower = request.query.lower()
+        chart_keywords = ['chart', 'graph', 'plot', 'visualize', 'pie chart', 'bar chart', 'line chart', 'histogram', 'scatter plot', 'heatmap', 'pareto']
+        
+        if result["results"] and any(keyword in query_lower for keyword in chart_keywords):
+            logger.info(f"Chart explicitly requested for query: {request.query}")
             logger.info(f"Data sample: {result['results'][:2] if result['results'] else 'No data'}")
             chart_spec = chart_agent.generate_chart_spec(
                 query=request.query,
@@ -110,6 +115,8 @@ async def process_query(request: QueryRequest):
             logger.info(f"Chart image generated: {chart_image is not None}")
             if chart_spec:
                 logger.info(f"Chart type: {chart_spec.get('type', 'unknown')}")
+        else:
+            logger.info(f"No chart generation - query doesn't contain chart keywords: {request.query}")
 
         response_data = {
             "query": request.query,
