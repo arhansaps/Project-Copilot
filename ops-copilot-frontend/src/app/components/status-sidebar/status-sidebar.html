@@ -1,0 +1,42 @@
+<div class="status-sidebar">
+  <div class="status-header">
+    <h3>System Status</h3>
+    <div class="status-indicator">
+      <span class="status-dot demo"></span>
+      <span class="status-text">Demo Mode</span>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">🌍</div>
+      <h4>Regional Data Sources</h4>
+    </div>
+    <div class="data-sources">
+      <div class="source-item" *ngFor="let region of regions">
+        <span class="source-name">{{ region.name }}</span>
+        <span class="status-dot connected"></span>
+        <span class="status-text">Connected</span>
+      </div>
+    </div>
+  </div>
+  
+  <div class="section">
+    <div class="section-header">
+      <div class="section-icon">📊</div>
+      <h4>Data Sources</h4>
+    </div>
+    <div class="data-sources">
+      <div class="source-item" *ngFor="let source of dataSources">
+        <div class="source-info">
+          <span class="source-name">{{ source.name }}</span>
+          <span class="source-type">{{ source.type }}</span>
+        </div>
+        <div class="source-status">
+          <span class="status-dot connected"></span>
+          <span class="latency">{{ source.latency }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

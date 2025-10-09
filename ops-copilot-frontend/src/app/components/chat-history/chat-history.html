@@ -1,0 +1,36 @@
+<div class="chat-history">
+  <div class="history-header">
+    <h3>Chat History</h3>
+    <button class="new-chat-btn" (click)="createNewChat()" title="Start a new chat" type="button">
+      ➕ New
+    </button>
+  </div>
+  
+  <div class="history-list" *ngIf="sessions.length > 0; else noHistory">
+    <div 
+      class="history-item" 
+      *ngFor="let session of sessions" 
+      [class.active]="session.id === currentSessionId"
+      (click)="selectSession(session)"
+    >
+      <div class="session-title">{{ session.title }}</div>
+      <div class="session-meta">
+        <span class="session-date">{{ session.lastModified | date:'short' }}</span>
+        <button 
+          class="delete-btn" 
+          (click)="deleteSession(session.id, $event)"
+          title="Delete chat"
+        >
+          🗑️
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <ng-template #noHistory>
+    <div class="no-history">
+      <p>No chat history yet</p>
+      <p>Start a conversation to see it here</p>
+    </div>
+  </ng-template>
+</div>

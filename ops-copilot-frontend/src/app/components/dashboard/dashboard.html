@@ -1,0 +1,56 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1 class="dashboard-title">Operations Dashboard</h1>
+    <p class="dashboard-subtitle">Real-time insights across 5 active regions</p>
+  </div>
+  
+  <div class="metrics-grid">
+    <app-metrics-card
+      title="Active Equipment"
+      value="1,247"
+      unit="units"
+      changeText="+5.2% vs last week"
+      changeType="positive">
+    </app-metrics-card>
+    
+    <app-metrics-card
+      title="Production Rate"
+      value="89.3"
+      unit="%"
+      changeText="-2.1% vs last week"
+      changeType="negative">
+    </app-metrics-card>
+    
+    <app-metrics-card
+      title="Fuel Efficiency"
+      value="92.7"
+      unit="%"
+      changeText="+1.8% vs last week"
+      changeType="positive">
+    </app-metrics-card>
+    
+    <app-metrics-card
+      title="Maintenance Due"
+      value="34"
+      unit="units"
+      changeText="0% vs last week"
+      changeType="neutral">
+    </app-metrics-card>
+  </div>
+  
+  <div class="chat-section">
+    <div class="chat-container">
+      <app-chat-history 
+        [currentSessionId]="currentSession?.id || null"
+        (sessionSelected)="onSessionSelected($event)"
+        (newChatRequested)="onNewChatRequested()">
+      </app-chat-history>
+      <div class="chat-main">
+        <app-chat 
+          [currentSession]="currentSession"
+          (sessionUpdated)="onSessionUpdated($event)">
+        </app-chat>
+      </div>
+    </div>
+  </div>
+</div>

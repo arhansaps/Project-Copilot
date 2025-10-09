@@ -1,0 +1,240 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="header-left">
+      <div class="logo">
+        <span class="logo-icon">🤖</span>
+        <h2>OEE Co-Pilot</h2>
+      </div>
+      <div class="status-indicator">
+        <span class="status-dot"></span>
+        <span class="status-text">Online</span>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="createNewChat()" title="Start New Chat">
+        <span class="btn-icon">💬</span>
+        New Chat
+      </button>
+      <button class="btn btn-outline" (click)="clearConversation()" title="Clear Conversation">
+        <span class="btn-icon">🗑️</span>
+        Clear
+      </button>
+    </div>
+  </div>
+
+  <div class="chat-messages" #chatMessages (scroll)="onScroll($event)">
+    <div *ngFor="let message of messages; trackBy: trackByMessage" 
+         class="message" 
+         [class.user-message]="message.isUser"
+         [class.bot-message]="!message.isUser">
+      
+      <div class="message-avatar">
+        <span *ngIf="message.isUser" class="avatar user-avatar">👤</span>
+        <span *ngIf="!message.isUser" class="avatar bot-avatar">🤖</span>
+      </div>
+      
+      <div class="message-content">
+        <div class="message-text" [innerHTML]="formatMessage(message.content)"></div>
+        
+        <!-- SQL Query Display -->
+        <div *ngIf="message.sqlQuery && !message.isUser" class="sql-query-container">
+          <div class="sql-header">
+            <span class="sql-label">
+              <span class="label-icon">🔍</span>
+              Generated SQL Query
+            </span>
+            <button class="copy-btn" (click)="copyToClipboard(message.sqlQuery)" title="Copy SQL Query">
+              <span class="copy-icon">📋</span>
+            </button>
+          </div>
+          <div class="sql-query-wrapper">
+            <pre class="sql-query"><code>{{ message.sqlQuery }}</code></pre>
+          </div>
+        </div>
+
+        <!-- Chart Display -->
+        <div *ngIf="message.chartSpec && !message.isUser" class="chart-container">
+          <div class="chart-header">
+            <span class="chart-label">
+              <span class="label-icon">📊</span>
+              Data Visualization
+            </span>
+          </div>
+          <div class="chart-wrapper">
+            <div echarts 
+                 [options]="getChartOptions(message.chartSpec)" 
+                 [initOpts]="chartInitOpts"
+                 class="chart">
+            </div>
+          </div>
+        </div>
+
+        <!-- Results Table -->
+        <div *ngIf="message.results && message.results.length > 0 && !message.isUser" class="results-container">
+          <div class="results-header">
+            <span class="results-label">
+              <span class="label-icon">📋</span>
+              Query Results ({{ message.results.length }} rows)
+            </span>
+            <button class="copy-btn" (click)="copyToClipboard(stringifyResults(message.results))" title="Copy Results as JSON">
+              <span class="copy-icon">📋</span>
+            </button>
+          </div>
+          
+          <div class="table-container">
+            <table class="results-table">
+              <thead>
+                <tr>
+                  <th *ngFor="let header of getTableHeaders(message.results)">{{ formatHeader(header) }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of getCurrentPageData(message); let i = index">
+                  <td *ngFor="let header of getTableHeaders(message.results)">
+                    {{ formatCellValue(row[header]) }}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <!-- Pagination -->
+          <div *ngIf="getTotalPages(message) > 1" class="pagination">
+            <button class="btn btn-sm btn-outline" 
+                    [disabled]="getCurrentPage(message) === 1"
+                    (click)="previousPage(message)">
+              <span class="btn-icon">←</span>
+              Previous
+            </button>
+            <span class="page-info">
+              Page {{ getCurrentPage(message) }} of {{ getTotalPages(message) }}
+              <span class="page-details">({{ getCurrentPageStart(message) }}-{{ getCurrentPageEnd(message) }} of {{ message.results.length }})</span>
+            </span>
+            <button class="btn btn-sm btn-outline" 
+                    [disabled]="getCurrentPage(message) === getTotalPages(message)"
+                    (click)="nextPage(message)">
+              Next
+              <span class="btn-icon">→</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Execution Metadata -->
+        <div *ngIf="message.metadata && !message.isUser" class="metadata-container">
+          <div class="metadata-item">
+            <span class="metadata-label">Execution Time:</span>
+            <span class="metadata-value">{{ message.metadata.execution_time_ms }}ms</span>
+          </div>
+          <div class="metadata-item" *ngIf="message.metadata.chart_type">
+            <span class="metadata-label">Chart Type:</span>
+            <span class="metadata-value">{{ message.metadata.chart_type }}</span>
+          </div>
+        </div>
+      </div>
+      
+      <div class="message-timestamp">
+        {{ formatTimestamp(message.timestamp) }}
+      </div>
+    </div>
+
+    <!-- Enhanced loading indicator for slow LLM/Pinecone operations -->
+    <div *ngIf="isTyping" class="message bot-message loading-indicator">
+      <div class="message-avatar">
+        <span class="avatar bot-avatar">🤖</span>
+      </div>
+      <div class="message-content">
+        <div class="loading-header">
+          <div class="loading-stage">{{ loadingStage || 'Processing your query...' }}</div>
+          <div class="loading-time" *ngIf="estimatedTimeRemaining > 0">
+            {{ formatTimeRemaining(estimatedTimeRemaining) }}
+          </div>
+        </div>
+        
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width.%]="loadingProgress"></div>
+          </div>
+          <div class="progress-text">{{ loadingProgress.toFixed(0) }}%</div>
+        </div>
+        
+        <div class="loading-details">
+          <div class="loading-step" *ngIf="loadingProgress < 20">
+            🔍 Analyzing your natural language query...
+          </div>
+          <div class="loading-step" *ngIf="loadingProgress >= 20 && loadingProgress < 40">
+            🧠 Processing with Gemini 2.0 Flash LLM...
+          </div>
+          <div class="loading-step" *ngIf="loadingProgress >= 40 && loadingProgress < 60">
+            🔎 Searching Pinecone vector database...
+          </div>
+          <div class="loading-step" *ngIf="loadingProgress >= 60 && loadingProgress < 80">
+            💾 Executing SQL query on database...
+          </div>
+          <div class="loading-step" *ngIf="loadingProgress >= 80 && loadingProgress < 100">
+            📊 Generating charts and visualizations...
+          </div>
+          <div class="loading-step" *ngIf="loadingProgress >= 100">
+            ✅ Preparing your response...
+          </div>
+        </div>
+        
+        <div class="loading-tips">
+          <small>💡 Complex queries may take longer due to vector search and LLM processing</small>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Query Suggestions -->
+  <div *ngIf="showSuggestions && suggestions.length > 0 && messages.length <= 1" class="suggestions-container">
+    <div class="suggestions-header">
+      <span class="suggestions-title">💡 Try asking:</span>
+      <button class="btn btn-sm btn-outline" (click)="toggleSuggestions()" title="Hide suggestions">
+        <span class="btn-icon">✕</span>
+      </button>
+    </div>
+    <div class="suggestions-grid">
+      <button 
+        *ngFor="let suggestion of suggestions" 
+        class="suggestion-card"
+        (click)="useSuggestion(suggestion)"
+        [disabled]="isLoading">
+        <span class="suggestion-text">{{ suggestion }}</span>
+        <span class="suggestion-icon">→</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="chat-input-container">
+    <div class="input-wrapper">
+      <div class="input-container">
+        <textarea 
+          [(ngModel)]="currentMessage"
+          (keydown)="onEnterKey($event)"
+          placeholder="Ask me about equipment status, production metrics, downtime analysis, or any operational data..."
+          class="chat-input"
+          [disabled]="isLoading"
+          rows="1">
+        </textarea>
+        <button 
+          class="send-button" 
+          (click)="sendMessage()" 
+          [disabled]="!currentMessage.trim() || isLoading">
+          <span *ngIf="!isLoading" class="send-icon">🚀</span>
+          <span *ngIf="isLoading" class="loading-spinner"></span>
+        </button>
+      </div>
+      <div class="input-footer">
+        <span class="input-hint">Press Enter to send, Shift+Enter for new line</span>
+        <button 
+          *ngIf="!showSuggestions && suggestions.length > 0" 
+          class="btn btn-sm btn-outline" 
+          (click)="toggleSuggestions()" 
+          title="Show suggestions">
+          <span class="btn-icon">💡</span>
+          Show Suggestions
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
