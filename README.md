@@ -24,7 +24,7 @@ ops_copilot/
 ```
 
 ## Quick Start
-Create a file called backend.json in the backend folder
+Create a file called backend.json in the backend folder.
 In the file, paste:
 ```
 {
