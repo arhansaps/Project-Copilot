@@ -1,5 +1,5 @@
 # OEE Co-Pilot - Mining Operations Assistant
-
+Made for Manipal Hackathon 2025.
 A full-stack application that provides intelligent analysis of mining operations data using natural language queries and AI-powered insights.
 
 ## Project Structure
@@ -41,8 +41,7 @@ ng serve --port 4200
 
 ### 3. Access Application
 - **API Documentation**: http://localhost:8000/docs
-- **Angular Frontend**: http://localhost:4200
-- **Simple Frontend**: http://localhost:3000
+- **Frontend**: http://localhost:3000
 
 ## Features
 
@@ -58,19 +57,14 @@ ng serve --port 4200
 ### Backend
 - **FastAPI**: Modern Python web framework
 - **LangChain**: AI/LLM integration
-- **Google Gemini**: AI language model
+- **Google Gemini 2.0 Flash**: AI language model
 - **MySQL**: Database (hosted on Aiven)
 - **Pinecone**: Vector database for semantic search
 
 ### Frontend
 - **Angular**: Modern web framework
-- **HTML/CSS/JavaScript**: Simple frontend option
 
 ## Documentation
 
 - [Backend Setup Guide](backend/CREDENTIALS_SETUP.md)
 - [API Documentation](http://localhost:8000/docs) (when running)
-
-## License
-
-This project is part of the Mhash 2025 technical competition.
