@@ -24,6 +24,23 @@ ops_copilot/
 ```
 
 ## Quick Start
+Create a file called backend.json in the backend folder
+In the file,
+paste
+{
+  "google_api_key": "Enter your Gemini API Key kere",
+  "pinecone_api_key": "",
+  "database": {
+    "host": "database-ishaanmaheshwari2906-85b8.l.aivencloud.com",
+    "user": "avnadmin",
+    "password": "AVNS_SlDzxmKFpE7g0pMq71l",
+    "database": "MiningAndFactoryData",
+    "port": 14333
+  }
+}
+
+Enter your actual Gemini API Key.
+Save the file.
 
 ### 1. Backend Setup
 ```bash
