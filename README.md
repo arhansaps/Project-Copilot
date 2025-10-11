@@ -27,6 +27,7 @@ ops_copilot/
 ***Create a file called backend.json in the backend folder
 In the file,
 paste
+***
 {
   "google_api_key": "Enter your Gemini API Key kere",
   "pinecone_api_key": "",
@@ -37,7 +38,7 @@ paste
     "database": "MiningAndFactoryData",
     "port": 14333
   }
-}
+}***
 
 Enter your actual Gemini API Key.
 Save the file,***
