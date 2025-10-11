@@ -24,7 +24,7 @@ ops_copilot/
 ```
 
 ## Quick Start
-Create a file called backend.json in the backend folder
+***Create a file called backend.json in the backend folder
 In the file,
 paste
 {
@@ -40,7 +40,7 @@ paste
 }
 
 Enter your actual Gemini API Key.
-Save the file.
+Save the file,***
 
 ### 1. Backend Setup
 ```bash
