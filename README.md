@@ -62,12 +62,12 @@ ng serve --port 4200
 
 ## Features
 
-- 🤖 **Natural Language Queries**: Ask questions about mining operations in plain English
-- 📊 **Data Visualization**: Automatic chart generation for data insights
-- 🗄️ **Database Integration**: Connect to Aiven MySQL database
-- 🔧 **CSV Upload**: Upload and process mining data files
-- 🐳 **Docker Support**: Containerized deployment
-- 🌐 **REST API**: Full REST API for frontend integration
+-  **Natural Language Queries**: Ask questions about mining operations in plain English
+- **Data Visualization**: Automatic chart generation for data insights
+-  **Database Integration**: Connect to Aiven MySQL database
+-  **CSV Upload**: Upload and process mining data files
+-  **Docker Support**: Containerized deployment
+-  **REST API**: Full REST API for frontend integration
 
 ## Technology Stack
 
